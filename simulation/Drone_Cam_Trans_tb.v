@@ -22,10 +22,12 @@
 
 module Drone_Cam_Trans_tb();
 reg clk;
+reg aclk;
 reg rstn;
 reg HDMIrstn;
 initial begin 
 clk = 1'b0;
+aclk = 1'b0;
 rstn = 1'b0;
 HDMIrstn = 1'b0;
 #100;
@@ -35,6 +37,16 @@ rstn = 1'b1;
 HDMIrstn = 1'b1;
 end
 always #4 clk = ~clk;
+always #10 aclk = ~aclk;
+
+reg [31:0]  S_APB_0_paddr    ; // input  [31:0] S_APB_0_paddr      ,
+reg         S_APB_0_penable  ; // input         S_APB_0_penable    ,
+wire [31:0] S_APB_0_prdata   ;  // output [31:0] S_APB_0_prdata     ,
+wire        S_APB_0_pready   ;  // output        S_APB_0_pready     ,
+reg         S_APB_0_psel     ; // input         S_APB_0_psel       ,
+wire        S_APB_0_pslverr  ;  // output        S_APB_0_pslverr    ,
+reg [31:0]  S_APB_0_pwdata   ; // input  [31:0] S_APB_0_pwdata     ,
+reg         S_APB_0_pwrite   ; // input         S_APB_0_pwrite     ,
 
 wire        m_axis_video_tready;   // output        s_axis_video_tready, 
 wire [31:0] m_axis_video_tdata ;   // input  [23:0] s_axis_video_tdata , 
@@ -104,7 +116,7 @@ wire RxPixelClk ;
  wire          Mm_axis_video_tready   ;// = 1'b1; //input  wire m_axis_video_tready            , 
  wire          Mm_axis_video_tlast    ; //output wire m_axis_video_tlast             , 
  wire          Mm_axis_video_tuser    ; //output wire m_axis_video_tuser               
-  
+ /* 
 // MyYCbCr
  MyYCbCr MyYCbCr_inst(
  .clk (clk )                          ,
@@ -121,7 +133,7 @@ wire RxPixelClk ;
  .m_axis_video_tlast   (Mm_axis_video_tlast )   ,
  .m_axis_video_tuser   (Mm_axis_video_tuser ) 
      );
-
+*/
 wire HVsync                     ;                        // input HVsync,                      
 wire TxFraimSync;
 wire RxFraimSync;
@@ -138,19 +150,20 @@ wire [7:0] Trans1Data;
 wire [7:0] Trans2Data;
 wire [7:0] Trans3Data;
   
-SlantMem SlantMem_inst(
+TxMem TxMem_inst(
 .Cclk               (clk),                       // input Cclk,                        
 .rstn               (rstn),                      // input rstn,                        
 
 .Mem_cont           (4'hf),
-.s_axis_video_tready(Mm_axis_video_tready),       // output        s_axis_video_tready, 
-.s_axis_video_tdata (Mm_axis_video_tdata ),       // input  [23:0] s_axis_video_tdata , 
-.s_axis_video_tvalid(Mm_axis_video_tvalid),       // input         s_axis_video_tvalid, 
-.s_axis_video_tuser (Mm_axis_video_tuser ),       // input         s_axis_video_tuser , 
-.s_axis_video_tlast (Mm_axis_video_tlast ),       // input         s_axis_video_tlast , 
+.s_axis_video_tready(Ms_axis_video_tready),       // output        s_axis_video_tready, 
+.s_axis_video_tdata (Ms_axis_video_tdata ),       // input  [23:0] s_axis_video_tdata , 
+.s_axis_video_tvalid(Ms_axis_video_tvalid),       // input         s_axis_video_tvalid, 
+.s_axis_video_tuser (Ms_axis_video_tuser ),       // input         s_axis_video_tuser , 
+.s_axis_video_tlast (Ms_axis_video_tlast ),       // input         s_axis_video_tlast , 
 
 .FraimSync          (TxFraimSync          ),
 .PixelClk           (TxPixelClk           ),       // input Hclk,                        
+.FraimSel           (1'b00               ),
 
 .HVsync             (HVsync             ),       // input HVsync,                      
 .HMemRead           (HMemRead           ),       // input HMemRead,         
@@ -163,93 +176,23 @@ SlantMem SlantMem_inst(
 .Trans2Data(Trans2Data),//output [7:0] Trans2Data,
 .Trans3Data(Trans3Data) //output [7:0] Trans3Data,         
     );
-/*    
-reg [3:0] Test;
-initial begin
-force  DDS_cont_inst.Send = 1'b1;
-force  DDS_cont_inst.WR = 1'b0;
-@(posedge rstn);
-Test = 4'h0;
-#100000;
-Test = 4'h1;
-#100000;
-Test = 4'h4;
-#100000;
-Test = 4'h6;
-#100000;
-end
-                                 
-wire         S_APB_0_axiclk     ;
-wire         S_APB_0_aresetn    ;
-wire  [31:0] S_APB_0_paddr      ;
-wire         S_APB_0_penable    ;
-wire  [31:0] S_APB_0_prdata     ;
-wire         S_APB_0_pready     ;
-wire         S_APB_0_psel       ;
-wire         S_APB_0_pslverr    ;
-wire  [31:0] S_APB_0_pwdata     ;
-wire         S_APB_0_pwrite     ;
 
-                                 
-wire DDS_PCLK                  ;
-wire DDS_IOup                  ;
-wire DDS_CSn                   ;
-wire DDS_RWn                   ;
-wire DDS_ReadEn                ;
-wire [7:0] DDS_DataOut         ;
-wire [7:0] DDS_DataIn          ;
-
-DDS_cont DDS_cont_inst(
-.clk (clk )                      ,
-.rstn(rstn)                      ,
-                          
-.S_APB_0_axiclk (S_APB_0_axiclk )    ,
-.S_APB_0_aresetn(S_APB_0_aresetn)    ,
-.S_APB_0_paddr  (S_APB_0_paddr  )    ,
-.S_APB_0_penable(S_APB_0_penable)    ,
-.S_APB_0_prdata (S_APB_0_prdata )    ,
-.S_APB_0_pready (S_APB_0_pready )    ,
-.S_APB_0_psel   (S_APB_0_psel   )    ,
-.S_APB_0_pslverr(S_APB_0_pslverr)    ,
-.S_APB_0_pwdata (S_APB_0_pwdata )    ,
-.S_APB_0_pwrite (S_APB_0_pwrite )    ,
-
-.Test(Test),
-
-.TransValid(TransValid)                ,
-.Trans0Data(Trans0Data)           ,
-.Trans1Data(Trans1Data)           ,
-.Trans2Data(Trans2Data)           ,
-.Trans3Data(Trans3Data)           ,
-                           
-.DDS_PCLK   (DDS_PCLK   ),
-.DDS_IOup   (DDS_IOup   ),
-.DDS_CSn    (DDS_CSn    ),
-.DDS_RWn    (DDS_RWn    ),
-.DDS_ReadEn (DDS_ReadEn ),
-.DDS_DataOut(DDS_DataOut),
-.DDS_DataIn (DDS_DataIn )
-    );
-*/
 reg SelHDMI;
 initial SelHDMI = 1'b1;
 always @(TxFraimSync) SelHDMI = ~SelHDMI;
-  HDMIdebug HDMIdebug_inst (
-    .Txclk(TxPixelClk),
-    .Rxclk(RxPixelClk),
+  TxHDMI TxHDMI_inst (
+    .clk(TxPixelClk),
     .rstn(HDMIrstn),
     .SelHDMI(SelHDMI),
     .Out_pData(Out_pData),
     .Out_pVSync(HVsync),
     .Out_pHSync(Out_pHSync),
     .Out_pVDE(pVDE),
-    .TxFraimSync(TxFraimSync),
-    .RxFraimSync(RxFraimSync),
+    .FraimSync(TxFraimSync),
     .Mem_Read(HMemRead),
-    .TxMem_Data(TxHDMIdata_Slant),
-    .RxMem_Data(RxHDMIdata_Slant)
+    .Mem_Data(TxHDMIdata_Slant)
   );
-
+/*
 SlantReceiver SlantReceiver_inst(
 .clk (clk ),
 .rstn(rstn),
@@ -270,21 +213,7 @@ SlantReceiver SlantReceiver_inst(
 .HDMIdata           (RxHDMIdata_Slant)        // output [11:0] HDMIdata    
 
     );
-////////////////////////////// mem test //////////////////////////////
-reg [4:0] Txmem[0:38399];
-reg [3:0] TxWEnslant;
-reg       TxDel_Valid;
-reg       TxValid_odd;
-reg [4:0] TXDelYData;
-//(WEnslant[0] && Del_Valid && Valid_odd)
-
-reg [4:0]  Rxmem[0:38399];
-reg        RxFrame0_received;
-reg [7:0]  RxBitTime0Counter;
-reg [17:0] RXadd0;
-reg [5:0]  RxReceive0Data;
-//if (Frame0_received && (BitTime0Counter == 8'h14) && !RXadd0[0]) YMem0[RXadd0[17:1]] <= Receive0Data;
-
+*/
 ////////////////////////////// End Of mem test //////////////////////////////
 task wr4fix;
 begin 
@@ -335,5 +264,61 @@ repeat (1750) @(posedge clk);
 #1;
 end
 endtask
+
+//////////////////////////////////////////////////
+/////////////// Read/write tasks /////////////////
+//////////////////////////////////////////////////
+
+task ReadAXI;
+input [31:0] addr;
+begin 
+    S_APB_0_paddr    = 0; // input  [31:0] S_APB_0_paddr      ,
+    S_APB_0_penable  = 0; // input         S_APB_0_penable    ,
+    S_APB_0_psel     = 0; // input         S_APB_0_psel       ,
+    S_APB_0_pwdata   = 0; // input  [31:0] S_APB_0_pwdata     ,
+    S_APB_0_pwrite   = 0; // input         S_APB_0_pwrite     ,
+    @(posedge aclk);
+    S_APB_0_paddr   = addr;
+    S_APB_0_psel    = 1'b1;
+    @(posedge aclk);
+    S_APB_0_penable    = 1'b1;
+    while (~S_APB_0_pready) begin
+        @(posedge aclk);    
+        if (S_APB_0_pready) begin 
+                S_APB_0_psel  = 1'b0;
+                S_APB_0_penable  = 1'b0;
+                end
+    end
+end 
+endtask 
+
+
+task WriteAXI;
+input [31:0] addr;
+input [31:0] data;
+begin 
+    S_APB_0_paddr    = 0; // input  [31:0] S_APB_0_paddr      ,
+    S_APB_0_penable  = 0; // input         S_APB_0_penable    ,
+    S_APB_0_psel     = 0; // input         S_APB_0_psel       ,
+    S_APB_0_pwdata   = 0; // input  [31:0] S_APB_0_pwdata     ,
+    S_APB_0_pwrite   = 0; // input         S_APB_0_pwrite     ,
+
+
+    @(posedge aclk);
+    S_APB_0_paddr   = addr;
+    S_APB_0_pwdata  = data;
+    S_APB_0_pwrite  = 1'b1;
+    S_APB_0_psel    = 1'b1;
+    @(posedge aclk);
+    S_APB_0_penable  = 1'b1;
+    while (~S_APB_0_pready) begin
+        @(posedge aclk);    
+        if (S_APB_0_pready) begin 
+                S_APB_0_psel  = 1'b0;
+                S_APB_0_penable  = 1'b0;
+                end
+    end
+end 
+endtask 
 
 endmodule
