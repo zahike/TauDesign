@@ -236,7 +236,7 @@ proc create_root_design { parentCell } {
   set dphy_hs_clock [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 dphy_hs_clock ]
 
   # Create ports
-  set CS_n_0 [ create_bd_port -dir O CS_n_0 ]
+  set CS_n_0 [ create_bd_port -dir O -from 3 -to 0 CS_n_0 ]
   set DDS_CSn_0 [ create_bd_port -dir O DDS_CSn_0 ]
   set DDS_DataIn_0 [ create_bd_port -dir I -from 7 -to 0 DDS_DataIn_0 ]
   set DDS_DataOut_0 [ create_bd_port -dir O -from 7 -to 0 DDS_DataOut_0 ]
@@ -248,10 +248,10 @@ proc create_root_design { parentCell } {
   set FCLK_CLK2_0 [ create_bd_port -dir O -type clk FCLK_CLK2_0 ]
   set FraimSel [ create_bd_port -dir I -from 1 -to 0 FraimSel ]
   set GPIO_0 [ create_bd_port -dir O GPIO_0 ]
-  set MISO_0 [ create_bd_port -dir I MISO_0 ]
-  set MOSI_0 [ create_bd_port -dir O MOSI_0 ]
+  set MISO_0 [ create_bd_port -dir I -from 3 -to 0 MISO_0 ]
+  set MOSI_0 [ create_bd_port -dir O -from 3 -to 0 MOSI_0 ]
   set Mem_cont [ create_bd_port -dir I -from 3 -to 0 Mem_cont ]
-  set SCLK_0 [ create_bd_port -dir O SCLK_0 ]
+  set SCLK_0 [ create_bd_port -dir O -from 3 -to 0 SCLK_0 ]
   set SelHDMI [ create_bd_port -dir I SelHDMI ]
   set SelStat [ create_bd_port -dir I SelStat ]
   set TMDS_Clk_n_0 [ create_bd_port -dir O -type clk TMDS_Clk_n_0 ]
@@ -391,13 +391,14 @@ proc create_root_design { parentCell } {
   # Create instance: ila_0, and set properties
   set ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:ila:6.2 ila_0 ]
   set_property -dict [ list \
-   CONFIG.C_DATA_DEPTH {4096} \
+   CONFIG.C_DATA_DEPTH {2048} \
    CONFIG.C_ENABLE_ILA_AXI_MON {false} \
    CONFIG.C_MONITOR_TYPE {Native} \
-   CONFIG.C_NUM_OF_PROBES {3} \
-   CONFIG.C_PROBE3_WIDTH {1} \
-   CONFIG.C_PROBE4_WIDTH {1} \
-   CONFIG.C_PROBE5_WIDTH {1} \
+   CONFIG.C_NUM_OF_PROBES {4} \
+   CONFIG.C_PROBE0_WIDTH {4} \
+   CONFIG.C_PROBE1_WIDTH {4} \
+   CONFIG.C_PROBE2_WIDTH {4} \
+   CONFIG.C_PROBE3_WIDTH {4} \
  ] $ila_0
 
   # Create instance: proc_sys_reset_0, and set properties
@@ -931,7 +932,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net HDMIdebug_0_Out_pVDE [get_bd_pins TxHDMI_0/Out_pVDE] [get_bd_pins TxMem_0/pVDE] [get_bd_pins rgb2dvi_0/vid_pVDE]
   connect_bd_net -net HDMIdebug_0_Out_pVSync [get_bd_pins TxHDMI_0/Out_pVSync] [get_bd_pins TxMem_0/HVsync] [get_bd_pins rgb2dvi_0/vid_pHSync]
   connect_bd_net -net MIPI_D_PHY_RX_0_RxByteClkHS [get_bd_pins MIPI_CSI_2_RX_0/RxByteClkHS] [get_bd_pins MIPI_D_PHY_RX_0/RxByteClkHS]
-  connect_bd_net -net MISO_0_1 [get_bd_ports MISO_0] [get_bd_pins TxMem_0/MISO]
+  connect_bd_net -net MISO_0_1 [get_bd_ports MISO_0] [get_bd_pins TxMem_0/MISO] [get_bd_pins ila_0/probe2]
   connect_bd_net -net Mem_cont_0_1 [get_bd_ports Mem_cont] [get_bd_pins TxMem_0/Mem_cont]
   connect_bd_net -net SCCBGPIO_Top_0_GPIO [get_bd_ports GPIO_0] [get_bd_pins SCCBGPIO_Top_0/GPIO]
   connect_bd_net -net SCCBGPIO_Top_0_S_APB_0_prdata [get_bd_pins SCCBGPIO_Top_0/S_APB_0_prdata] [get_bd_pins axi_apb_bridge_0/m_apb_prdata]
@@ -946,7 +947,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net TxHDMI_0_Mem_Read [get_bd_pins TxHDMI_0/Mem_Read] [get_bd_pins TxMem_0/HMemRead]
   connect_bd_net -net TxHDMI_0_Out_pData [get_bd_pins TxHDMI_0/Out_pData] [get_bd_pins rgb2dvi_0/vid_pData]
   connect_bd_net -net TxHDMI_0_Out_pHSync [get_bd_pins TxHDMI_0/Out_pHSync] [get_bd_pins rgb2dvi_0/vid_pVSync]
-  connect_bd_net -net TxMem_0_CS_n [get_bd_ports CS_n_0] [get_bd_pins TxMem_0/CS_n] [get_bd_pins ila_0/probe2]
+  connect_bd_net -net TxMem_0_CS_n [get_bd_ports CS_n_0] [get_bd_pins TxMem_0/CS_n] [get_bd_pins ila_0/probe3]
   connect_bd_net -net TxMem_0_FraimSync [get_bd_pins TxHDMI_0/FraimSync] [get_bd_pins TxMem_0/FraimSync]
   connect_bd_net -net TxMem_0_HDMIdata [get_bd_pins TxHDMI_0/Mem_Data] [get_bd_pins TxMem_0/HDMIdata]
   connect_bd_net -net TxMem_0_MOSI [get_bd_ports MOSI_0] [get_bd_pins TxMem_0/MOSI] [get_bd_pins ila_0/probe1]

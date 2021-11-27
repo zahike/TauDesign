@@ -72,20 +72,35 @@ inout cam_iic_sda_io,
   output led6_g,    // }]; #IO_L6N_T0_VREF_35 Sch=led6_g
   output led6_r,    // }]; #IO_L18P_T2_34 Sch=led6_r
 
-output SCLK,
-output MOSI,
-input  MISO,
-output CS_n,
+output SCLKb,
+output MOSIb,
+input  MISOb,
+output CS_nb,
+
+output SCLKc,
+output MOSIc,
+input  MISOc,
+output CS_nc,
+
+output SCLKd,
+output MOSId,
+input  MISOd,
+output CS_nd,
+
+output SCLKe,
+output MOSIe,
+input  MISOe,
+output CS_ne,
 
   output [3:0] ja_p,
-  output [3:0] ja_n,
+  output [3:0] ja_n
 //  output [4:1] jb_p,
 //  output [4:1] jb_n,
-  output [4:1] jc_p,
-  output [4:1] jc_n,
-  inout  [4:1] jd_n,
-  inout  [4:1] jd_p,
-  output [8:1] je
+//  output [4:1] jc_p,
+//  output [4:1] jc_n,
+//  inout  [4:1] jd_n,
+//  inout  [4:1] jd_p,
+//  output [8:1] je
     );
 
 
@@ -132,6 +147,11 @@ wire [5:0]Trans3Data;    // output [5:0]Trans3Data;
 wire [1:0]FraimSel;   //  input [1:0]FraimSel;
 wire SelHDMI;         //  input SelHDMI;
 wire SelStat;         //  input SelStat;
+
+wire [3:0] SCLK;
+wire [3:0] MOSI;
+wire [3:0] MISO;
+wire [3:0] CS_n;
     
 Drone_Cam_BD Drone_Cam_BD_inst
 (
@@ -199,7 +219,7 @@ Drone_Cam_BD Drone_Cam_BD_inst
 
 .SCLK_0(SCLK),
 .MOSI_0(MOSI),
-.MISO_0(1'b0),//MISO),
+.MISO_0(MISO),
 .CS_n_0(CS_n),
  
 .Trans0Data    (Trans0Data),  //  output [5:0]Trans0Data;
@@ -284,6 +304,27 @@ assign led[3] = SelStatCount; //[0] }]; #IO_L23P_T3_35 Sch=led[0]
  assign DDS_DataIn_0[0] = jd_n[4];
  */
 
+assign SCLKb = SCLK[0];
+assign MOSIb = MOSI[0];
+assign MISO[0] = MISOb;
+assign CS_nb = CS_n[0];
+
+assign SCLKc = SCLK[1];
+assign MOSIc = MOSI[1];
+assign MISO[1] = MISOc;
+assign CS_nc = CS_n[1];
+
+assign SCLKd = SCLK[2];
+assign MOSId = MOSI[2];
+assign MISO[2] = MISOd;
+assign CS_nd = CS_n[2];
+
+assign SCLKe = SCLK[3];
+assign MOSIe = MOSI[3];
+assign MISO[3] = MISOe;
+assign CS_ne = CS_n[3];
+
+
 //assign jb_p[1] = Trans0Data[0];
 //assign jb_n[1] = Trans0Data[1];
 //assign jb_p[2] = Trans0Data[2];
@@ -293,32 +334,32 @@ assign led[3] = SelStatCount; //[0] }]; #IO_L23P_T3_35 Sch=led[0]
 //assign jb_p[4] = 1'b0;
 //assign jb_n[4] = 1'b0;
 
-assign jc_n[1] = Trans1Data[0];
-assign jc_p[1] = Trans1Data[1];
-assign jc_n[2] = Trans1Data[2];
-assign jc_p[2] = Trans1Data[3];
-assign jc_n[3] = Trans1Data[4];
-assign jc_p[3] = Trans1Data[5];
-assign jc_n[4] = 1'b0;
-assign jc_p[4] = 1'b0;
+//assign jc_n[1] = Trans1Data[0];
+//assign jc_p[1] = Trans1Data[1];
+//assign jc_n[2] = Trans1Data[2];
+//assign jc_p[2] = Trans1Data[3];
+//assign jc_n[3] = Trans1Data[4];
+//assign jc_p[3] = Trans1Data[5];
+//assign jc_n[4] = 1'b0;
+//assign jc_p[4] = 1'b0;
 
-assign jd_p[1] = Trans2Data[0];
-assign jd_n[1] = Trans2Data[1];
-assign jd_p[2] = Trans2Data[2];
-assign jd_n[2] = Trans2Data[3];
-assign jd_p[3] = Trans2Data[4];
-assign jd_n[3] = Trans2Data[5];
-assign jd_p[4] = 1'b0;
-assign jd_n[4] = 1'b0;
+//assign jd_p[1] = Trans2Data[0];
+//assign jd_n[1] = Trans2Data[1];
+//assign jd_p[2] = Trans2Data[2];
+//assign jd_n[2] = Trans2Data[3];
+//assign jd_p[3] = Trans2Data[4];
+//assign jd_n[3] = Trans2Data[5];
+//assign jd_p[4] = 1'b0;
+//assign jd_n[4] = 1'b0;
 
-assign je  [1] = Trans3Data[0];
-assign je  [2] = Trans3Data[1];
-assign je  [3] = Trans3Data[2];
-assign je  [4] = Trans3Data[3];
-assign je  [5] = Trans3Data[4];
-assign je  [6] = Trans3Data[5];
-assign je  [7] = 1'b0;
-assign je  [8] = 1'b0;
+//assign je  [1] = Trans3Data[0];
+//assign je  [2] = Trans3Data[1];
+//assign je  [3] = Trans3Data[2];
+//assign je  [4] = Trans3Data[3];
+//assign je  [5] = Trans3Data[4];
+//assign je  [6] = Trans3Data[5];
+//assign je  [7] = 1'b0;
+//assign je  [8] = 1'b0;
  
  
 endmodule

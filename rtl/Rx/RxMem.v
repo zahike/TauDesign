@@ -33,11 +33,12 @@ input rstn,
 output FraimSync,
 input[1:0]  FraimSel,
 
-input SPIDataValid,
-input [11:0] SPIData,
-input [15:0] SPIDataAdd,
-
 output PixelClk,
+
+input  [3:0] SCLK,
+input  [3:0] MOSI,
+output [3:0] MISO,
+input  [3:0] CS_n,
 
 input HVsync  ,
 input HMemRead,
@@ -45,7 +46,7 @@ input pVDE    ,
 output [23:0] HDMIdata
 
     );
-
+/*
 wire        s_axis_video_tready;
 wire [31:0] s_axis_video_tdata  = 32'h00000000;
 wire        s_axis_video_tvalid = 1'b0;
@@ -116,10 +117,44 @@ always @(posedge Cclk or negedge rstn)
     if (!rstn) Line_Odd <= 1'b0;
      else if (Del_Last && ~Valid_odd) Line_Odd <= Reg_FraimSync ;
      else if (Del_Last &&  Valid_odd) Line_Odd <= ~Reg_FraimSync ;
+*/
+
+wire [3:0] SPIDataValid;
+wire [11:0] SPIData[3:0];
+wire [15:0] SPIDataAdd[3:0];
+
+genvar i;
+
+generate 
+for (i=0;i<4;i=i+1) begin
+SPI_Rx SPI_Rx_inst(
+.clk (Cclk ),                    // input clk,
+.rstn(rstn),                   // input rstn,
+
+.SPIDataValid(SPIDataValid[i]),          // output SPIDataValid,
+.SPIData     (SPIData     [i]),               // output [11:0] SPIData,
+.SPIDataAdd  (SPIDataAdd  [i]),            // output [15:0] SPIDataAdd,
+
+.SCLK(SCLK[i]),                  // input  SCLK,
+.MOSI(MOSI[i]),                  // input  MOSI,
+.MISO(MISO[i]),                  // output MISO,
+.CS_n(CS_n[i])                   // input  CS_n
+    );
+end
+endgenerate
 
 reg [11:0] YMem0 [0:38399]; // 95ff
+reg [11:0] YMem1 [0:38399]; // 95ff
+reg [11:0] YMem2 [0:38399]; // 95ff
+reg [11:0] YMem3 [0:38399]; // 95ff
 always @(posedge Cclk)
-    if (SPIDataValid) YMem0[SPIDataAdd] <= SPIData;
+    if (SPIDataValid[0]) YMem0[SPIDataAdd[0]] <= SPIData[0];
+always @(posedge Cclk)                 
+    if (SPIDataValid[1]) YMem1[SPIDataAdd[1]] <= SPIData[1];
+always @(posedge Cclk)                
+    if (SPIDataValid[2]) YMem2[SPIDataAdd[2]] <= SPIData[2];
+always @(posedge Cclk)                 
+    if (SPIDataValid[3]) YMem3[SPIDataAdd[3]] <= SPIData[3];
 
 //reg [11:0] YMem0 [0:38399]; // 95ff
 //reg [11:0] YMem1 [0:38399];
@@ -165,17 +200,17 @@ reg [15:0] TRadd;
 wire [15:0] readMemAdd = (!Reg_Div_Clk) ? HRadd[19:3] : TRadd;
 
 reg [11:0] Reg_YMem0;
-wire [11:0] Reg_YMem1 = 12'h000;
-wire [11:0] Reg_YMem2 = 12'h000;
-wire [11:0] Reg_YMem3 = 12'h000;
+reg [11:0] Reg_YMem1;
+reg [11:0] Reg_YMem2;
+reg [11:0] Reg_YMem3;
 always @(posedge Cclk)
     Reg_YMem0 <=  YMem0[readMemAdd];
-//always @(posedge Cclk)
-//    Reg_YMem1 <=  YMem1[readMemAdd];
-//always @(posedge Cclk)
-//    Reg_YMem2 <=  YMem2[readMemAdd];
-//always @(posedge Cclk)
-//    Reg_YMem3 <=  YMem3[readMemAdd];
+always @(posedge Cclk)
+    Reg_YMem1 <=  YMem1[readMemAdd];
+always @(posedge Cclk)
+    Reg_YMem2 <=  YMem2[readMemAdd];
+always @(posedge Cclk)
+    Reg_YMem3 <=  YMem3[readMemAdd];
 
 //reg [11:0] Reg_YMem0;
 //reg [11:0] Reg_YMem1;
@@ -220,7 +255,7 @@ assign  HDMIdata = (REnslant[0]) ? RGB4Pix[23:0] :
                    (REnslant[2]) ? RGB4Pix[71:48] :
                    (REnslant[3]) ? RGB4Pix[95:72] : 24'h000000;
   
-assign s_axis_video_tready = 1'b1;   
+//assign s_axis_video_tready = 1'b1;   
 
 /////////////////////////// End Of TRANSFRT DATA TO SCREAN  ///////////////////////////  
 endmodule

@@ -49,10 +49,10 @@ input HMemRead,
 input pVDE    ,
 output [23:0] HDMIdata,
 
-output SCLK,
-output MOSI,
-input  MISO,
-output CS_n
+output [3:0] SCLK,
+output [3:0] MOSI,
+input  [3:0] MISO,
+output [3:0] CS_n
 
     );
 
@@ -161,22 +161,26 @@ always @(posedge Cclk or negedge rstn)
      else if (Cnt_Div_Clk == 3'b011)  Reg_SwReadAdd <= 1'b0;
         
 reg [19:0] HRadd;
-reg [15:0] TRadd;
+//reg [15:0] TRadd;
+wire [15:0] TRadd[0:3];
 
-wire [15:0] readMemAdd = (!Reg_Div_Clk) ? HRadd[19:3] : TRadd;
+wire [15:0] readMemAdd0 = (!Reg_Div_Clk) ? HRadd[19:3] : TRadd[0];
+wire [15:0] readMemAdd1 = (!Reg_Div_Clk) ? HRadd[19:3] : TRadd[1];
+wire [15:0] readMemAdd2 = (!Reg_Div_Clk) ? HRadd[19:3] : TRadd[2];
+wire [15:0] readMemAdd3 = (!Reg_Div_Clk) ? HRadd[19:3] : TRadd[3];
 
 reg [11:0] Reg_YMem0;
 reg [11:0] Reg_YMem1;
 reg [11:0] Reg_YMem2;
 reg [11:0] Reg_YMem3;
 always @(posedge Cclk)
-    Reg_YMem0 <=  YMem0[readMemAdd];
+    Reg_YMem0 <=  YMem0[readMemAdd0];
 always @(posedge Cclk)
-    Reg_YMem1 <=  YMem1[readMemAdd];
+    Reg_YMem1 <=  YMem1[readMemAdd1];
 always @(posedge Cclk)
-    Reg_YMem2 <=  YMem2[readMemAdd];
+    Reg_YMem2 <=  YMem2[readMemAdd2];
 always @(posedge Cclk)
-    Reg_YMem3 <=  YMem3[readMemAdd];
+    Reg_YMem3 <=  YMem3[readMemAdd3];
 
 always @(posedge Cclk or negedge rstn)
     if (!rstn) HRadd <= 20'h00001;
@@ -218,6 +222,7 @@ assign s_axis_video_tready = 1'b1;
 /////////////////////////// End Of TRANSFRT DATA TO SCREAN  ///////////////////////////  
 /////////////////////////// Transmit Data  ///////////////////////////  
 
+/*
 //reg tranData;
 wire StartSPI;
 reg StopSPI;
@@ -236,7 +241,8 @@ reg [1:0] DevtranData;
 always @(posedge Cclk or negedge rstn)
     if (!rstn) DevtranData <= 2'b00;
      else DevtranData <= {DevtranData[0],tranData}; 
-         
+*/         
+
 reg [11:0] Reg_TranData0;
 reg [11:0] Reg_TranData1;
 reg [11:0] Reg_TranData2;
@@ -252,8 +258,16 @@ always @(posedge Cclk or negedge rstn)
      else if (Cnt_Div_Clk == 3'b010) Reg_TranData2 <= Reg_YMem2;
 always @(posedge Cclk or negedge rstn)
     if (!rstn) Reg_TranData3 <= 12'h000;
-     else if (Cnt_Div_Clk == 3'b010) Reg_TranData3 <= Reg_YMem2;
+     else if (Cnt_Div_Clk == 3'b010) Reg_TranData3 <= Reg_YMem3;
      
+wire [11:0] TranInData[0:3]; 
+
+assign TranInData[0] = Reg_TranData0;
+assign TranInData[1] = Reg_TranData1;
+assign TranInData[2] = Reg_TranData2;
+assign TranInData[3] = Reg_TranData3;
+     
+ /*    
 
 always @(posedge Cclk or negedge rstn)
     if (!rstn) SPIdatasave <= 12'h000;
@@ -307,7 +321,34 @@ CC1200SPI CC1200SPI_inst(
 .MISO(MISO),
 .CS_n(CS_n)
     );
-     
+*/
+wire Tran1Start = (CWadd == 20'h0603d) ? 1'b1 : 1'b0;
+wire [15:0] TRadd_test;     
+
+//wire [3:0] SCLK;               // output wire SCLK,
+//wire [3:0] MOSI;               // output wire MOSI,
+//wire [3:0] MISO;               // input  wire MISO,
+//wire [3:0] CS_n;               // output wire CS_n
      
 
+genvar i;
+generate 
+for (i=0;i<4;i=i+1) begin
+    TxSPItran TxSPItran_inst(
+    .clk (Cclk),               // input  wire clk ,
+    .rstn(rstn),               // input  wire rstn,
+                         //         
+    .TranStart(Tran1Start),          // input  wire TranStart,
+                         //         
+    .TranInData(TranInData[i]),         // input  wire [11:0] TranInData,
+                        //         
+    .TRadd(TRadd[i]),              // output wire  [15:0] TRadd,
+    
+    .SCLK(SCLK[i]),               // output wire SCLK,
+    .MOSI(MOSI[i]),               // output wire MOSI,
+    .MISO(MISO[i]),               // input  wire MISO,
+    .CS_n(CS_n[i])                // output wire CS_n
+            );
+end
+endgenerate
 endmodule

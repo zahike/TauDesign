@@ -40,7 +40,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # The design that will be created by this Tcl script contains the following 
 # module references:
-# RxHDMI, RxMem, RxSyncPic, SPI_Rx
+# RxHDMI, RxMem, RxSyncPic
 
 # Please add the sources of those modules before sourcing this Tcl script.
 
@@ -161,7 +161,6 @@ if { $bCheckModules == 1 } {
 RxHDMI\
 RxMem\
 RxSyncPic\
-SPI_Rx\
 "
 
    set list_mods_missing ""
@@ -226,10 +225,10 @@ proc create_root_design { parentCell } {
   # Create interface ports
 
   # Create ports
-  set CS_n_0 [ create_bd_port -dir I CS_n_0 ]
-  set MISO_0 [ create_bd_port -dir O MISO_0 ]
-  set MOSI_0 [ create_bd_port -dir I MOSI_0 ]
-  set SCLK_0 [ create_bd_port -dir I SCLK_0 ]
+  set CS_n_0 [ create_bd_port -dir I -from 3 -to 0 CS_n_0 ]
+  set MISO_0 [ create_bd_port -dir O -from 3 -to 0 MISO_0 ]
+  set MOSI_0 [ create_bd_port -dir I -from 3 -to 0 MOSI_0 ]
+  set SCLK_0 [ create_bd_port -dir I -from 3 -to 0 SCLK_0 ]
   set TMDS_Clk_n_0 [ create_bd_port -dir O TMDS_Clk_n_0 ]
   set TMDS_Clk_p_0 [ create_bd_port -dir O TMDS_Clk_p_0 ]
   set TMDS_Data_n_0 [ create_bd_port -dir O -from 2 -to 0 TMDS_Data_n_0 ]
@@ -272,17 +271,6 @@ proc create_root_design { parentCell } {
      return 1
    }
   
-  # Create instance: SPI_Rx_0, and set properties
-  set block_name SPI_Rx
-  set block_cell_name SPI_Rx_0
-  if { [catch {set SPI_Rx_0 [create_bd_cell -type module -reference $block_name $block_cell_name] } errmsg] } {
-     catch {common::send_msg_id "BD_TCL-105" "ERROR" "Unable to add referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   } elseif { $SPI_Rx_0 eq "" } {
-     catch {common::send_msg_id "BD_TCL-106" "ERROR" "Unable to referenced block <$block_name>. Please add the files for ${block_name}'s definition into the project."}
-     return 1
-   }
-  
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_0 ]
   set_property -dict [ list \
@@ -305,9 +293,11 @@ proc create_root_design { parentCell } {
    CONFIG.C_DATA_DEPTH {8192} \
    CONFIG.C_ENABLE_ILA_AXI_MON {false} \
    CONFIG.C_MONITOR_TYPE {Native} \
-   CONFIG.C_NUM_OF_PROBES {6} \
-   CONFIG.C_PROBE1_WIDTH {12} \
-   CONFIG.C_PROBE2_WIDTH {16} \
+   CONFIG.C_NUM_OF_PROBES {4} \
+   CONFIG.C_PROBE0_WIDTH {4} \
+   CONFIG.C_PROBE1_WIDTH {4} \
+   CONFIG.C_PROBE2_WIDTH {4} \
+   CONFIG.C_PROBE3_WIDTH {4} \
  ] $ila_0
 
   # Create instance: proc_sys_reset_0, and set properties
@@ -328,23 +318,20 @@ proc create_root_design { parentCell } {
  ] $xlconstant_0
 
   # Create port connections
-  connect_bd_net -net CS_n_0_1 [get_bd_ports CS_n_0] [get_bd_pins SPI_Rx_0/CS_n] [get_bd_pins ila_0/probe5]
-  connect_bd_net -net MOSI_0_1 [get_bd_ports MOSI_0] [get_bd_pins SPI_Rx_0/MOSI] [get_bd_pins ila_0/probe4]
+  connect_bd_net -net CS_n_0_1 [get_bd_ports CS_n_0] [get_bd_pins RxMem_0/CS_n] [get_bd_pins ila_0/probe3]
+  connect_bd_net -net MOSI_0_1 [get_bd_ports MOSI_0] [get_bd_pins RxMem_0/MOSI] [get_bd_pins ila_0/probe1]
   connect_bd_net -net RxHDMI_0_Mem_Read [get_bd_pins RxHDMI_0/Mem_Read] [get_bd_pins RxMem_0/HMemRead] [get_bd_pins RxSyncPic_0/HMemRead]
   connect_bd_net -net RxHDMI_0_Out_pData [get_bd_pins RxHDMI_0/Out_pData] [get_bd_pins rgb2dvi_0/vid_pData]
   connect_bd_net -net RxHDMI_0_Out_pHSync [get_bd_pins RxHDMI_0/Out_pHSync] [get_bd_pins rgb2dvi_0/vid_pVSync]
   connect_bd_net -net RxHDMI_0_Out_pVDE [get_bd_pins RxHDMI_0/Out_pVDE] [get_bd_pins RxMem_0/pVDE] [get_bd_pins RxSyncPic_0/pVDE] [get_bd_pins rgb2dvi_0/vid_pVDE]
   connect_bd_net -net RxHDMI_0_Out_pVSync [get_bd_pins RxHDMI_0/Out_pVSync] [get_bd_pins RxMem_0/HVsync] [get_bd_pins RxSyncPic_0/HVsync] [get_bd_pins rgb2dvi_0/vid_pHSync]
   connect_bd_net -net RxMem_0_HDMIdata [get_bd_pins RxHDMI_0/Mem_Data] [get_bd_pins RxMem_0/HDMIdata]
+  connect_bd_net -net RxMem_0_MISO [get_bd_ports MISO_0] [get_bd_pins RxMem_0/MISO] [get_bd_pins ila_0/probe2]
   connect_bd_net -net RxSyncPic_0_PixelClk [get_bd_pins RxHDMI_0/clk] [get_bd_pins RxMem_0/PixelClk] [get_bd_pins rgb2dvi_0/PixelClk]
-  connect_bd_net -net SCLK_0_1 [get_bd_ports SCLK_0] [get_bd_pins SPI_Rx_0/SCLK] [get_bd_pins ila_0/probe3]
-  connect_bd_net -net SPI_Rx_0_MISO [get_bd_ports MISO_0] [get_bd_pins SPI_Rx_0/MISO]
-  connect_bd_net -net SPI_Rx_0_SPIData [get_bd_pins RxMem_0/SPIData] [get_bd_pins SPI_Rx_0/SPIData] [get_bd_pins ila_0/probe1]
-  connect_bd_net -net SPI_Rx_0_SPIDataAdd [get_bd_pins RxMem_0/SPIDataAdd] [get_bd_pins SPI_Rx_0/SPIDataAdd] [get_bd_pins ila_0/probe2]
-  connect_bd_net -net SPI_Rx_0_SPIDataValid [get_bd_pins RxMem_0/SPIDataValid] [get_bd_pins SPI_Rx_0/SPIDataValid] [get_bd_pins ila_0/probe0]
-  connect_bd_net -net clk_wiz_0_clk_out2 [get_bd_pins RxMem_0/Cclk] [get_bd_pins RxSyncPic_0/clk] [get_bd_pins SPI_Rx_0/clk] [get_bd_pins clk_wiz_0/clk_out2] [get_bd_pins ila_0/clk] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins rgb2dvi_0/SerialClk]
+  connect_bd_net -net SCLK_0_1 [get_bd_ports SCLK_0] [get_bd_pins RxMem_0/SCLK] [get_bd_pins ila_0/probe0]
+  connect_bd_net -net clk_wiz_0_clk_out2 [get_bd_pins RxMem_0/Cclk] [get_bd_pins RxSyncPic_0/clk] [get_bd_pins clk_wiz_0/clk_out2] [get_bd_pins ila_0/clk] [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins rgb2dvi_0/SerialClk]
   connect_bd_net -net clk_wiz_0_locked [get_bd_pins clk_wiz_0/locked] [get_bd_pins proc_sys_reset_0/dcm_locked] [get_bd_pins proc_sys_reset_0/ext_reset_in]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins RxHDMI_0/rstn] [get_bd_pins RxMem_0/rstn] [get_bd_pins RxSyncPic_0/rstn] [get_bd_pins SPI_Rx_0/rstn] [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins rgb2dvi_0/aRst_n]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_pins RxHDMI_0/rstn] [get_bd_pins RxMem_0/rstn] [get_bd_pins RxSyncPic_0/rstn] [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins rgb2dvi_0/aRst_n]
   connect_bd_net -net rgb2dvi_0_TMDS_Clk_n [get_bd_ports TMDS_Clk_n_0] [get_bd_pins rgb2dvi_0/TMDS_Clk_n]
   connect_bd_net -net rgb2dvi_0_TMDS_Clk_p [get_bd_ports TMDS_Clk_p_0] [get_bd_pins rgb2dvi_0/TMDS_Clk_p]
   connect_bd_net -net rgb2dvi_0_TMDS_Data_n [get_bd_ports TMDS_Data_n_0] [get_bd_pins rgb2dvi_0/TMDS_Data_n]

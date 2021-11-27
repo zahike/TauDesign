@@ -108,10 +108,10 @@ set_property -dict {PACKAGE_PIN V7 IOSTANDARD LVCMOS33} [get_ports {jb_n[2]}]
 #set_property -dict {PACKAGE_PIN V6 IOSTANDARD LVCMOS33} [get_ports {jb_p[4]}]
 #set_property -dict {PACKAGE_PIN W6 IOSTANDARD LVCMOS33} [get_ports {jb_n[4]}]
 
-set_property -dict {PACKAGE_PIN Y7 IOSTANDARD LVCMOS33} [get_ports SCLK]
-set_property -dict {PACKAGE_PIN Y6 IOSTANDARD LVCMOS33} [get_ports MOSI]
-set_property -dict {PACKAGE_PIN V6 IOSTANDARD LVCMOS33} [get_ports MISO]
-set_property -dict {PACKAGE_PIN W6 IOSTANDARD LVCMOS33} [get_ports CS_n]
+set_property -dict {PACKAGE_PIN Y7 IOSTANDARD LVCMOS33} [get_ports SCLKb]
+set_property -dict {PACKAGE_PIN Y6 IOSTANDARD LVCMOS33} [get_ports MOSIb]
+set_property -dict {PACKAGE_PIN V6 IOSTANDARD LVCMOS33} [get_ports MISOb]
+set_property -dict {PACKAGE_PIN W6 IOSTANDARD LVCMOS33} [get_ports CS_nb]
 
 
 ##Pmod Header JC
@@ -119,10 +119,15 @@ set_property -dict {PACKAGE_PIN V15 IOSTANDARD LVCMOS33} [get_ports {jc_p[1]}]
 set_property -dict {PACKAGE_PIN W15 IOSTANDARD LVCMOS33} [get_ports {jc_n[1]}]
 set_property -dict {PACKAGE_PIN T11 IOSTANDARD LVCMOS33} [get_ports {jc_p[2]}]
 set_property -dict {PACKAGE_PIN T10 IOSTANDARD LVCMOS33} [get_ports {jc_n[2]}]
-set_property -dict {PACKAGE_PIN W14 IOSTANDARD LVCMOS33} [get_ports {jc_p[3]}]
-set_property -dict {PACKAGE_PIN Y14 IOSTANDARD LVCMOS33} [get_ports {jc_n[3]}]
-set_property -dict {PACKAGE_PIN T12 IOSTANDARD LVCMOS33} [get_ports {jc_p[4]}]
-set_property -dict {PACKAGE_PIN U12 IOSTANDARD LVCMOS33} [get_ports {jc_n[4]}]
+#set_property -dict {PACKAGE_PIN W14 IOSTANDARD LVCMOS33} [get_ports {jc_p[3]}]
+#set_property -dict {PACKAGE_PIN Y14 IOSTANDARD LVCMOS33} [get_ports {jc_n[3]}]
+#set_property -dict {PACKAGE_PIN T12 IOSTANDARD LVCMOS33} [get_ports {jc_p[4]}]
+#set_property -dict {PACKAGE_PIN U12 IOSTANDARD LVCMOS33} [get_ports {jc_n[4]}]
+
+set_property -dict {PACKAGE_PIN W14 IOSTANDARD LVCMOS33} [get_ports SCLKc]
+set_property -dict {PACKAGE_PIN Y14 IOSTANDARD LVCMOS33} [get_ports MOSIc]
+set_property -dict {PACKAGE_PIN T12 IOSTANDARD LVCMOS33} [get_ports MISOc]
+set_property -dict {PACKAGE_PIN U12 IOSTANDARD LVCMOS33} [get_ports CS_nc]
 
 
 ##Pmod Header JD
@@ -139,10 +144,15 @@ set_property -dict {PACKAGE_PIN T15 IOSTANDARD LVCMOS33} [get_ports {jd_n[1]}]
 set_property -dict {PACKAGE_PIN T14 IOSTANDARD LVCMOS33} [get_ports {jd_p[1]}]
 set_property -dict {PACKAGE_PIN R14 IOSTANDARD LVCMOS33} [get_ports {jd_n[2]}]
 set_property -dict {PACKAGE_PIN P14 IOSTANDARD LVCMOS33} [get_ports {jd_p[2]}]
-set_property -dict {PACKAGE_PIN U15 IOSTANDARD LVCMOS33} [get_ports {jd_n[3]}]
-set_property -dict {PACKAGE_PIN U14 IOSTANDARD LVCMOS33} [get_ports {jd_p[3]}]
-set_property -dict {PACKAGE_PIN V18 IOSTANDARD LVCMOS33} [get_ports {jd_n[4]}]
-set_property -dict {PACKAGE_PIN V17 IOSTANDARD LVCMOS33} [get_ports {jd_p[4]}]
+#set_property -dict {PACKAGE_PIN U15 IOSTANDARD LVCMOS33} [get_ports {jd_n[3]}]
+#set_property -dict {PACKAGE_PIN U14 IOSTANDARD LVCMOS33} [get_ports {jd_p[3]}]
+#set_property -dict {PACKAGE_PIN V18 IOSTANDARD LVCMOS33} [get_ports {jd_n[4]}]
+#set_property -dict {PACKAGE_PIN V17 IOSTANDARD LVCMOS33} [get_ports {jd_p[4]}]
+
+set_property -dict {PACKAGE_PIN U14 IOSTANDARD LVCMOS33} [get_ports SCLKd]
+set_property -dict {PACKAGE_PIN U15 IOSTANDARD LVCMOS33} [get_ports MOSId]
+set_property -dict {PACKAGE_PIN V17 IOSTANDARD LVCMOS33} [get_ports MISOd]
+set_property -dict {PACKAGE_PIN V18 IOSTANDARD LVCMOS33} [get_ports CS_nd]
 
 
 ##Pmod Header JE
@@ -150,10 +160,15 @@ set_property -dict {PACKAGE_PIN V12 IOSTANDARD LVCMOS33} [get_ports {je[1]}]
 set_property -dict {PACKAGE_PIN W16 IOSTANDARD LVCMOS33} [get_ports {je[2]}]
 set_property -dict {PACKAGE_PIN J15 IOSTANDARD LVCMOS33} [get_ports {je[3]}]
 set_property -dict {PACKAGE_PIN H15 IOSTANDARD LVCMOS33} [get_ports {je[4]}]
-set_property -dict {PACKAGE_PIN V13 IOSTANDARD LVCMOS33} [get_ports {je[5]}]
-set_property -dict {PACKAGE_PIN U17 IOSTANDARD LVCMOS33} [get_ports {je[6]}]
-set_property -dict {PACKAGE_PIN T17 IOSTANDARD LVCMOS33} [get_ports {je[7]}]
-set_property -dict {PACKAGE_PIN Y17 IOSTANDARD LVCMOS33} [get_ports {je[8]}]
+#set_property -dict {PACKAGE_PIN V13 IOSTANDARD LVCMOS33} [get_ports {je[5]}]
+#set_property -dict {PACKAGE_PIN U17 IOSTANDARD LVCMOS33} [get_ports {je[6]}]
+#set_property -dict {PACKAGE_PIN T17 IOSTANDARD LVCMOS33} [get_ports {je[7]}]
+#set_property -dict {PACKAGE_PIN Y17 IOSTANDARD LVCMOS33} [get_ports {je[8]}]
+
+set_property -dict {PACKAGE_PIN V13 IOSTANDARD LVCMOS33} [get_ports SCLKe]
+set_property -dict {PACKAGE_PIN U17 IOSTANDARD LVCMOS33} [get_ports MOSIe]
+set_property -dict {PACKAGE_PIN T17 IOSTANDARD LVCMOS33} [get_ports MISOe]
+set_property -dict {PACKAGE_PIN Y17 IOSTANDARD LVCMOS33} [get_ports CS_ne]
 
 
 #USB-OTG overcurrent detect pin
