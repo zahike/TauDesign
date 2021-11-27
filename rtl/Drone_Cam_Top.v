@@ -72,10 +72,15 @@ inout cam_iic_sda_io,
   output led6_g,    // }]; #IO_L6N_T0_VREF_35 Sch=led6_g
   output led6_r,    // }]; #IO_L18P_T2_34 Sch=led6_r
 
+output SCLK,
+output MOSI,
+input  MISO,
+output CS_n,
+
   output [3:0] ja_p,
   output [3:0] ja_n,
-  output [4:1] jb_p,
-  output [4:1] jb_n,
+//  output [4:1] jb_p,
+//  output [4:1] jb_n,
   output [4:1] jc_p,
   output [4:1] jc_n,
   inout  [4:1] jd_n,
@@ -191,6 +196,11 @@ Drone_Cam_BD Drone_Cam_BD_inst
 .TMDS_Clk_p_0 (hdmi_tx_clk_p ),   //   output TMDS_Clk_p_0;
 .TMDS_Data_n_0(hdmi_tx_data_n),   //   output [2:0]TMDS_Data_n_0;
 .TMDS_Data_p_0(hdmi_tx_data_p),   //   output [2:0]TMDS_Data_p_0;
+
+.SCLK_0(SCLK),
+.MOSI_0(MOSI),
+.MISO_0(1'b0),//MISO),
+.CS_n_0(CS_n),
  
 .Trans0Data    (Trans0Data),  //  output [5:0]Trans0Data;
 .Trans1Data    (Trans1Data),  //  output [5:0]Trans1Data;
@@ -274,14 +284,14 @@ assign led[3] = SelStatCount; //[0] }]; #IO_L23P_T3_35 Sch=led[0]
  assign DDS_DataIn_0[0] = jd_n[4];
  */
 
-assign jb_p[1] = Trans0Data[0];
-assign jb_n[1] = Trans0Data[1];
-assign jb_p[2] = Trans0Data[2];
-assign jb_n[2] = Trans0Data[3];
-assign jb_p[3] = Trans0Data[4];
-assign jb_n[3] = Trans0Data[5];
-assign jb_p[4] = 1'b0;
-assign jb_n[4] = 1'b0;
+//assign jb_p[1] = Trans0Data[0];
+//assign jb_n[1] = Trans0Data[1];
+//assign jb_p[2] = Trans0Data[2];
+//assign jb_n[2] = Trans0Data[3];
+//assign jb_p[3] = Trans0Data[4];
+//assign jb_n[3] = Trans0Data[5];
+//assign jb_p[4] = 1'b0;
+//assign jb_n[4] = 1'b0;
 
 assign jc_n[1] = Trans1Data[0];
 assign jc_p[1] = Trans1Data[1];

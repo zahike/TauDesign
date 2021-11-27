@@ -5,7 +5,7 @@
 // 
 // Create Date: 07.09.2021 10:03:14
 // Design Name: 
-// Module Name: TxMem
+// Module Name: RxMem
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,41 +20,37 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module TxMem(
+module RxMem(
 input Cclk,
 input rstn,
 
-input [3:0] Mem_cont,
-
-output        s_axis_video_tready,
-input  [31:0] s_axis_video_tdata ,
-input         s_axis_video_tvalid,
-input         s_axis_video_tuser ,
-input         s_axis_video_tlast ,
+//output        s_axis_video_tready,
+//input  [31:0] s_axis_video_tdata ,
+//input         s_axis_video_tvalid,
+//input         s_axis_video_tuser ,
+//input         s_axis_video_tlast ,
 
 output FraimSync,
 input[1:0]  FraimSel,
 
-output  TransValid,
-output [5:0] Trans0Data,
-output [5:0] Trans1Data,
-output [5:0] Trans2Data,
-output [5:0] Trans3Data,
-
+input SPIDataValid,
+input [11:0] SPIData,
+input [15:0] SPIDataAdd,
 
 output PixelClk,
 
 input HVsync  ,
 input HMemRead,
 input pVDE    ,
-output [23:0] HDMIdata,
-
-output SCLK,
-output MOSI,
-input  MISO,
-output CS_n
+output [23:0] HDMIdata
 
     );
+
+wire        s_axis_video_tready;
+wire [31:0] s_axis_video_tdata  = 32'h00000000;
+wire        s_axis_video_tvalid = 1'b0;
+wire        s_axis_video_tuser  = 1'b0;
+wire        s_axis_video_tlast  = 1'b0;
 
 parameter INC = 4;
 parameter FRAME1 = 24'haab155;
@@ -121,19 +117,22 @@ always @(posedge Cclk or negedge rstn)
      else if (Del_Last && ~Valid_odd) Line_Odd <= Reg_FraimSync ;
      else if (Del_Last &&  Valid_odd) Line_Odd <= ~Reg_FraimSync ;
 
-
 reg [11:0] YMem0 [0:38399]; // 95ff
-reg [11:0] YMem1 [0:38399];
-reg [11:0] YMem2 [0:38399];
-reg [11:0] YMem3 [0:38399];
 always @(posedge Cclk)
-    if (WEnslant[0] && Del_Valid && Valid_odd) YMem0[CWadd[19:2]] <= DelYData;
-always @(posedge Cclk)                                       
-    if (WEnslant[1] && Del_Valid && Valid_odd) YMem1[CWadd[19:2]] <= DelYData;
-always @(posedge Cclk)                                       
-    if (WEnslant[2] && Del_Valid && Valid_odd) YMem2[CWadd[19:2]] <= DelYData;
-always @(posedge Cclk)                                       
-    if (WEnslant[3] && Del_Valid && Valid_odd) YMem3[CWadd[19:2]] <= DelYData;
+    if (SPIDataValid) YMem0[SPIDataAdd] <= SPIData;
+
+//reg [11:0] YMem0 [0:38399]; // 95ff
+//reg [11:0] YMem1 [0:38399];
+//reg [11:0] YMem2 [0:38399];
+//reg [11:0] YMem3 [0:38399];
+//always @(posedge Cclk)
+//    if (WEnslant[0] && Del_Valid && Valid_odd) YMem0[CWadd[19:2]] <= DelYData;
+//always @(posedge Cclk)                                       
+//    if (WEnslant[1] && Del_Valid && Valid_odd) YMem1[CWadd[19:2]] <= DelYData;
+//always @(posedge Cclk)                                       
+//    if (WEnslant[2] && Del_Valid && Valid_odd) YMem2[CWadd[19:2]] <= DelYData;
+//always @(posedge Cclk)                                       
+//    if (WEnslant[3] && Del_Valid && Valid_odd) YMem3[CWadd[19:2]] <= DelYData;
 ///////////////////////////  End Of data write to Memory  ///////////////////////////  
 
 
@@ -166,17 +165,30 @@ reg [15:0] TRadd;
 wire [15:0] readMemAdd = (!Reg_Div_Clk) ? HRadd[19:3] : TRadd;
 
 reg [11:0] Reg_YMem0;
-reg [11:0] Reg_YMem1;
-reg [11:0] Reg_YMem2;
-reg [11:0] Reg_YMem3;
+wire [11:0] Reg_YMem1 = 12'h000;
+wire [11:0] Reg_YMem2 = 12'h000;
+wire [11:0] Reg_YMem3 = 12'h000;
 always @(posedge Cclk)
     Reg_YMem0 <=  YMem0[readMemAdd];
-always @(posedge Cclk)
-    Reg_YMem1 <=  YMem1[readMemAdd];
-always @(posedge Cclk)
-    Reg_YMem2 <=  YMem2[readMemAdd];
-always @(posedge Cclk)
-    Reg_YMem3 <=  YMem3[readMemAdd];
+//always @(posedge Cclk)
+//    Reg_YMem1 <=  YMem1[readMemAdd];
+//always @(posedge Cclk)
+//    Reg_YMem2 <=  YMem2[readMemAdd];
+//always @(posedge Cclk)
+//    Reg_YMem3 <=  YMem3[readMemAdd];
+
+//reg [11:0] Reg_YMem0;
+//reg [11:0] Reg_YMem1;
+//reg [11:0] Reg_YMem2;
+//reg [11:0] Reg_YMem3;
+//always @(posedge Cclk)
+//    Reg_YMem0 <=  YMem0[readMemAdd];
+//always @(posedge Cclk)
+//    Reg_YMem1 <=  YMem1[readMemAdd];
+//always @(posedge Cclk)
+//    Reg_YMem2 <=  YMem2[readMemAdd];
+//always @(posedge Cclk)
+//    Reg_YMem3 <=  YMem3[readMemAdd];
 
 always @(posedge Cclk or negedge rstn)
     if (!rstn) HRadd <= 20'h00001;
@@ -194,19 +206,14 @@ always @(posedge Cclk or negedge rstn)
      else if ((Cnt_Div_Clk == 3'b001) && !HMemRead && Del_HMemRead) REnslant <= {REnslant[0],REnslant[3:1]};
      else if ((Cnt_Div_Clk == 3'b000) && HMemRead && !HRadd[0]) REnslant <= {REnslant[2:0],REnslant[3]};
 
-wire [11:0] Reg_Cont_YMem0 = (Mem_cont[0]) ? Reg_YMem0 : 12'h000;
-wire [11:0] Reg_Cont_YMem1 = (Mem_cont[1]) ? Reg_YMem1 : 12'h000;
-wire [11:0] Reg_Cont_YMem2 = (Mem_cont[2]) ? Reg_YMem2 : 12'h000;
-wire [11:0] Reg_Cont_YMem3 = (Mem_cont[3]) ? Reg_YMem3 : 12'h000;
-
 reg [95:0] RGB4Pix;
 always @(posedge Cclk or negedge rstn)
     if (!rstn) RGB4Pix <= {96{1'b0}};
-     else if (Cnt_Div_Clk == 3'b000) RGB4Pix <= {Reg_Cont_YMem3[11:8],4'hf,Reg_Cont_YMem3[7:4],4'hf,Reg_Cont_YMem3[3:0],4'hf,
-                                                   Reg_Cont_YMem2[11:8],4'hf,Reg_Cont_YMem2[7:4],4'hf,Reg_Cont_YMem2[3:0],4'hf,
-                                                   Reg_Cont_YMem1[11:8],4'hf,Reg_Cont_YMem1[7:4],4'hf,Reg_Cont_YMem1[3:0],4'hf,
-                                                   Reg_Cont_YMem0[11:8],4'hf,Reg_Cont_YMem0[7:4],4'hf,Reg_Cont_YMem0[3:0],4'hf
-                                                   };
+     else if (Cnt_Div_Clk == 3'b000) RGB4Pix <= {Reg_YMem3[11:8],4'hf,Reg_YMem3[7:4],4'hf,Reg_YMem3[3:0],4'hf,
+                                                 Reg_YMem2[11:8],4'hf,Reg_YMem2[7:4],4'hf,Reg_YMem2[3:0],4'hf,
+                                                 Reg_YMem1[11:8],4'hf,Reg_YMem1[7:4],4'hf,Reg_YMem1[3:0],4'hf,
+                                                 Reg_YMem0[11:8],4'hf,Reg_YMem0[7:4],4'hf,Reg_YMem0[3:0],4'hf
+                                                 };
 
 assign  HDMIdata = (REnslant[0]) ? RGB4Pix[23:0] :
                    (REnslant[1]) ? RGB4Pix[47:24] :
@@ -216,98 +223,4 @@ assign  HDMIdata = (REnslant[0]) ? RGB4Pix[23:0] :
 assign s_axis_video_tready = 1'b1;   
 
 /////////////////////////// End Of TRANSFRT DATA TO SCREAN  ///////////////////////////  
-/////////////////////////// Transmit Data  ///////////////////////////  
-
-//reg tranData;
-wire StartSPI;
-reg StopSPI;
-wire Busy;
-wire Load_Next;
-reg [11:0] SPIdatasave;
-reg [7:0] SPIdataOut;
-reg [1:0] SPIcount;
-
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) tranData <= 1'b0;
-     else if (CWadd == 20'h0603d) tranData <= 1'b1;
-     else if (TRadd == 16'h9600) tranData <= 1'b0;
-
-reg [1:0] DevtranData;
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) DevtranData <= 2'b00;
-     else DevtranData <= {DevtranData[0],tranData}; 
-         
-reg [11:0] Reg_TranData0;
-reg [11:0] Reg_TranData1;
-reg [11:0] Reg_TranData2;
-reg [11:0] Reg_TranData3;
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) Reg_TranData0 <= 12'h000;
-     else if (Cnt_Div_Clk == 3'b010) Reg_TranData0 <= Reg_YMem0;
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) Reg_TranData1 <= 12'h000;
-     else if (Cnt_Div_Clk == 3'b010) Reg_TranData1 <= Reg_YMem1;
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) Reg_TranData2 <= 12'h000;
-     else if (Cnt_Div_Clk == 3'b010) Reg_TranData2 <= Reg_YMem2;
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) Reg_TranData3 <= 12'h000;
-     else if (Cnt_Div_Clk == 3'b010) Reg_TranData3 <= Reg_YMem2;
-     
-
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) SPIdatasave <= 12'h000;
-     else if (Load_Next || StartSPI) SPIdatasave <= Reg_TranData0;
-
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) SPIcount <= 2'b00;
-     else if (SPIcount == 2'b11) SPIcount <= 2'b00;
-     else if (StartSPI) SPIcount <= 2'b01;
-     else if (!tranData) SPIcount <= 2'b00;
-     else if (Load_Next) SPIcount <= SPIcount + 1;
-
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) SPIdataOut <= 8'h00;
-     else if (!tranData) SPIdataOut <= Reg_TranData0[7:0];
-     else case (SPIcount)
-            2'b00 : SPIdataOut <= Reg_TranData0[7:0];
-            2'b01 : SPIdataOut <= {Reg_TranData0[3:0],SPIdatasave[11:8]};
-            2'b10 : SPIdataOut <= Reg_TranData0[11:4];
-          default : SPIdataOut <= Reg_TranData0[7:0];
-        endcase
-       
-assign StartSPI = (DevtranData == 2'b01) ? 1'b1 : 1'b0;     
-
-always @(posedge Cclk or negedge rstn)
-    if (!rstn) StopSPI <= 1'b0;
-     else if (DevtranData == 2'b10) StopSPI <= 1'b1;
-     else if (Load_Next) StopSPI <= 1'b0;      
-      
-always @(posedge Cclk or negedge rstn) 
-    if (!rstn) TRadd <= 16'h0000;
-     else if (!tranData) TRadd <= 16'h0000;
-     else if (StartSPI ) TRadd <= 16'h0001;
-     else if (Load_Next && (SPIcount != 2'b01)) TRadd <= TRadd + 1;
-          
-CC1200SPI CC1200SPI_inst(
-.clk (Cclk),
-.rstn(rstn),
-
-.Start   (StartSPI   ),
-.Stop    (StopSPI),
-.Busy    (Busy        ),
-.DataOut (SPIdataOut ),
-.DataIn  (  ),
-.ClockDiv(16'h0010),
-
-.Load_Next(Load_Next),
-
-.SCLK(SCLK),
-.MOSI(MOSI),
-.MISO(MISO),
-.CS_n(CS_n)
-    );
-     
-     
-
 endmodule

@@ -38,7 +38,7 @@ HDMIrstn = 1'b1;
 end
 always #4 clk = ~clk;
 always #10 aclk = ~aclk;
-
+/*
 reg [31:0]  S_APB_0_paddr    ; // input  [31:0] S_APB_0_paddr      ,
 reg         S_APB_0_penable  ; // input         S_APB_0_penable    ,
 wire [31:0] S_APB_0_prdata   ;  // output [31:0] S_APB_0_prdata     ,
@@ -47,25 +47,15 @@ reg         S_APB_0_psel     ; // input         S_APB_0_psel       ,
 wire        S_APB_0_pslverr  ;  // output        S_APB_0_pslverr    ,
 reg [31:0]  S_APB_0_pwdata   ; // input  [31:0] S_APB_0_pwdata     ,
 reg         S_APB_0_pwrite   ; // input         S_APB_0_pwrite     ,
-
+*/
 wire        m_axis_video_tready;   // output        s_axis_video_tready, 
 wire [31:0] m_axis_video_tdata ;   // input  [23:0] s_axis_video_tdata , 
 reg         m_axis_video_tvalid;   // input         s_axis_video_tvalid, 
 reg         m_axis_video_tuser ;   // input         s_axis_video_tuser , 
 reg         m_axis_video_tlast ;   // input         s_axis_video_tlast , 
 
-reg [5:0] Gdata;
-always @(posedge clk or negedge rstn)
-    if (!rstn) Gdata <= 6'h00;
-     else if (m_axis_video_tuser) Gdata <= 6'h00;
-     else if (m_axis_video_tvalid) Gdata <= Gdata + 1;
-wire [5:0] Bdata;     
-wire [5:0] Rdata;     
-//assign m_axis_video_tdata = {2'b00,Rdata,5'h00,Bdata,5'h00,Gdata,5'h00};      
-//assign m_axis_video_tdata = data;     
 
-
-SyntPic SyntPic_inst(
+TxSyntPic TxSyntPic_inst(
 .clk (clk ),
 .rstn(rstn),
 
@@ -89,7 +79,7 @@ m_axis_video_tuser  = 0;   // input         s_axis_video_tuser ,
 m_axis_video_tlast  = 0;   // input         s_axis_video_tlast , 
 @(posedge rstn);
 #100;
-repeat (3)begin 
+repeat (20)begin 
         wrLine(1);
         repeat (479) wrLine(0);
 //        repeat (1000000) @(posedge clk);
@@ -100,46 +90,23 @@ repeat (3)begin
 $finish;    
 end
 
-
-
-wire SerilsClk;
 wire TxPixelClk ;
-wire RxPixelClk ;
 
  wire [31 : 0] Ms_axis_video_tdata  = m_axis_video_tdata ; //input  wire [23 : 0] s_axis_video_tdata    , 
  wire          Ms_axis_video_tready    ; //output wire s_axis_video_tready            , 
  wire          Ms_axis_video_tvalid = m_axis_video_tvalid ; //input  wire s_axis_video_tvalid            , 
  wire          Ms_axis_video_tlast  = m_axis_video_tlast ; //input  wire s_axis_video_tlast             , 
  wire          Ms_axis_video_tuser  = m_axis_video_tuser ; //input  wire s_axis_video_tuser         ,     
- wire [23 : 0] Mm_axis_video_tdata    ; //output wire [23 : 0] m_axis_video_tdata    , 
- wire          Mm_axis_video_tvalid   ; //output wire m_axis_video_tvalid            , 
- wire          Mm_axis_video_tready   ;// = 1'b1; //input  wire m_axis_video_tready            , 
- wire          Mm_axis_video_tlast    ; //output wire m_axis_video_tlast             , 
- wire          Mm_axis_video_tuser    ; //output wire m_axis_video_tuser               
- /* 
-// MyYCbCr
- MyYCbCr MyYCbCr_inst(
- .clk (clk )                          ,
- .rstn(rstn)        ,
- 
- .s_axis_video_tdata   (Ms_axis_video_tdata )   ,
- .s_axis_video_tready  (Ms_axis_video_tready)   ,
- .s_axis_video_tvalid  (Ms_axis_video_tvalid)   ,
- .s_axis_video_tlast   (Ms_axis_video_tlast )   ,
- .s_axis_video_tuser   (Ms_axis_video_tuser )   ,
- .m_axis_video_tdata   (Mm_axis_video_tdata )   ,
- .m_axis_video_tvalid  (Mm_axis_video_tvalid)   ,
- .m_axis_video_tready  (Mm_axis_video_tready)   ,
- .m_axis_video_tlast   (Mm_axis_video_tlast )   ,
- .m_axis_video_tuser   (Mm_axis_video_tuser ) 
-     );
-*/
+// wire [23 : 0] Mm_axis_video_tdata    ; //output wire [23 : 0] m_axis_video_tdata    , 
+// wire          Mm_axis_video_tvalid   ; //output wire m_axis_video_tvalid            , 
+// wire          Mm_axis_video_tready   ;// = 1'b1; //input  wire m_axis_video_tready            , 
+// wire          Mm_axis_video_tlast    ; //output wire m_axis_video_tlast             , 
+// wire          Mm_axis_video_tuser    ; //output wire m_axis_video_tuser               
+
 wire HVsync                     ;                        // input HVsync,                      
 wire TxFraimSync;
-wire RxFraimSync;
 wire HMemRead                   ;                      // input HMemRead,                    
 wire  [23:0] TxHDMIdata_Slant     ;   // output [11:0] HDMIdata             
-wire  [23:0] RxHDMIdata_Slant     ;   // output [11:0] HDMIdata             
 wire [23 : 0] Out_pData;
 wire Out_pHSync;
 wire pVDE;
@@ -149,6 +116,11 @@ wire [7:0] Trans0Data;
 wire [7:0] Trans1Data;
 wire [7:0] Trans2Data;
 wire [7:0] Trans3Data;
+
+wire SCLK;
+wire MOSI;
+wire MISO = 1'b0;
+wire CS_n;
   
 TxMem TxMem_inst(
 .Cclk               (clk),                       // input Cclk,                        
@@ -169,6 +141,11 @@ TxMem TxMem_inst(
 .HMemRead           (HMemRead           ),       // input HMemRead,         
 .pVDE               (pVDE               ),       // output        Out_pVDE  ,
 .HDMIdata           (TxHDMIdata_Slant     ),        // output [11:0] HDMIdata    
+
+.SCLK(SCLK),
+.MOSI(MOSI),
+.MISO(MISO),
+.CS_n(CS_n),
 
 .TransValid(TransValid),
 .Trans0Data(Trans0Data),//output [7:0] Trans0Data,
@@ -192,28 +169,17 @@ always @(TxFraimSync) SelHDMI = ~SelHDMI;
     .Mem_Read(HMemRead),
     .Mem_Data(TxHDMIdata_Slant)
   );
-/*
-SlantReceiver SlantReceiver_inst(
-.clk (clk ),
-.rstn(rstn),
-
-.Receive0Data(Trans0Data),
-.Receive1Data(Trans1Data),
-.Receive2Data(Trans2Data),
-.Receive3Data(Trans3Data),
-
-.FraimSync(RxFraimSync),
-.FraimSel(2'b00),
-
-.PixelClk(RxPixelClk),
-
-.HVsync             (HVsync             ),       // input HVsync,                      
-.HMemRead           (HMemRead           ),       // input HMemRead,         
-.pVDE               (pVDE               ),       // output        Out_pVDE  ,
-.HDMIdata           (RxHDMIdata_Slant)        // output [11:0] HDMIdata    
-
-    );
-*/
+  
+SPI_Rx SPI_Rx_inst(
+  .clk (clk ),
+  .rstn(rstn),
+  
+  .SCLK(SCLK),
+  .MOSI(MOSI),
+  .MISO(MISO),
+  .CS_n(CS_n)
+      );
+  
 ////////////////////////////// End Of mem test //////////////////////////////
 task wr4fix;
 begin 
@@ -268,7 +234,7 @@ endtask
 //////////////////////////////////////////////////
 /////////////// Read/write tasks /////////////////
 //////////////////////////////////////////////////
-
+/*
 task ReadAXI;
 input [31:0] addr;
 begin 
@@ -320,5 +286,5 @@ begin
     end
 end 
 endtask 
-
+*/
 endmodule
